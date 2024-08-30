@@ -3,158 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chemical Risk Assessment - Science Expo</title>
+    <title>Chemical Risk Assessment</title>
     <style>
+        /* Basic CSS for styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background: #f0f8ff;
+            background-color: #f4f4f4;
             color: #333;
         }
-        header {
-            background-color: #007acc;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
         h1 {
-            font-size: 2em;
-            margin: 0;
+            text-align: center;
+            margin-top: 20px;
         }
         .container {
             width: 80%;
-            margin: 20px auto;
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
-            padding: 20px;
-            transition: transform 0.2s;
-        }
-        .card:hover {
-            transform: scale(1.05);
-        }
-        h2 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-        p {
-            margin-bottom: 10px;
-        }
-        .chart-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-        }
-        canvas {
-            display: block;
             margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
         }
-        footer {
-            background-color: #007acc;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
+        table {
             width: 100%;
-            bottom: 0;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+        input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #riskResult {
+            font-weight: bold;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Chemical Risk Assessment - Science Expo</h1>
-    </header>
-
+    <h1>Chemical Risk Assessment</h1>
     <div class="container">
-        <div class="card">
-            <h2>Chemical Details and Risk Levels</h2>
-            <p>Select a chemical to view details:</p>
-            <select id="chemicalSelect" onchange="updateChemicalDetails()">
-                <option value="Caffeine">Caffeine</option>
-                <option value="Aspartame">Aspartame</option>
-                <option value="Sodium Benzoate">Sodium Benzoate</option>
-                <option value="Paracetamol">Paracetamol</option>
-                <option value="Nicotine">Nicotine</option>
-                <option value="Sodium Nitrite">Sodium Nitrite</option>
-                <option value="Monosodium Glutamate">Monosodium Glutamate (MSG)</option>
-                <option value="Saccharin">Saccharin</option>
-                <option value="Acesulfame K">Acesulfame K</option>
-                <option value="Cyclamate">Cyclamate</option>
-                <option value="Ibuprofen">Ibuprofen</option>
-                <option value="Acetaminophen">Acetaminophen (Paracetamol)</option>
-                <option value="Ethanol">Ethanol</option>
-                <option value="Benzene">Benzene</option>
-                <option value="Formaldehyde">Formaldehyde</option>
-                <option value="Propylene Glycol">Propylene Glycol</option>
-                <option value="Methanol">Methanol</option>
-                <option value="Toluene">Toluene</option>
-                <option value="Chlorpyrifos">Chlorpyrifos</option>
-                <option value="Atrazine">Atrazine</option>
-                <option value="Glyphosate">Glyphosate</option>
-                <option value="DDT">DDT</option>
-                <option value="Lead Acetate">Lead Acetate</option>
-                <option value="Sodium Fluoride">Sodium Fluoride</option>
-                <option value="Thalidomide">Thalidomide</option>
-            </select>
-            <div id="chemicalDetails"></div>
-        </div>
+        <!-- Risk Data Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Substance Name</th>
+                    <th>LD50 Value (mg/kg)</th>
+                    <th>QSAR Model Risk Level</th>
+                    <th>Experimental Risk Level</th>
+                    <th>Difference</th>
+                    <th>Accuracy (%)</th>
+                    <th>Concentration (c)</th>
+                    <th>Exposure (e)</th>
+                    <th>BMR (kcal/day)</th>
+                    <th>Risk Level</th>
+                    <th>VF</th>
+                    <th>Assumptions</th>
+                    <th>Risk Level (without VF)</th>
+                    <th>Risk Level (with VF)</th>
+                    <th>Accuracy Change (%)</th>
+                    <th>Updated Risk Level-metabolism included</th>
+                    <th>Genetic Factor</th>
+                    <th>Risk Level</th>
+                    <th>Adjustment Factor</th>
+                    <th>Toxicity Risk (new)</th>
+                    <th>Difference QSAR-Toxicity Risk(with adjusted factors)</th>
+                    <th>Accuracy Classification</th>
+                    <th>Final Risk Classification</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Sample data row (repeat as needed) -->
+                <tr>
+                    <td>Caffeine</td>
+                    <td>192</td>
+                    <td>0.05</td>
+                    <td>0.04</td>
+                    <td>0.01</td>
+                    <td>80</td>
+                    <td>1 mg/kg</td>
+                    <td>1 kg/day</td>
+                    <td>2000</td>
+                    <td>2.63E-06</td>
+                    <td>1.5</td>
+                    <td>c = 1 mg/kg, e = 1 kg/day, BMR = 2000 kcal/day, Body mass= 70 kg</td>
+                    <td>2.63E-06</td>
+                    <td>3.95E-06</td>
+                    <td>50.00%</td>
+                    <td>0.00025</td>
+                    <td>2</td>
+                    <td>0.0103</td>
+                    <td>1333.33</td>
+                    <td>0.0143</td>
+                    <td>0.0107</td>
+                    <td>Moderate</td>
+                    <td>Moderate</td>
+                </tr>
+                <!-- Additional rows go here -->
+            </tbody>
+        </table>
 
-        <div class="card">
-            <h2>Risk Level Analysis</h2>
-            <div class="chart-container">
-                <canvas id="riskChart"></canvas>
-            </div>
-        </div>
+        <!-- Live Data Graph -->
+        <canvas id="riskChart" width="400" height="200"></canvas>
+
+        <!-- Risk Calculator -->
+        <h2>Risk Calculator</h2>
+        <form id="riskCalculator">
+            <label for="concentration">Concentration (c):</label>
+            <input type="number" id="concentration" name="concentration" step="any" required>
+            <label for="exposure">Exposure (e):</label>
+            <input type="number" id="exposure" name="exposure" step="any" required>
+            <label for="bmr">BMR (kcal/day):</label>
+            <input type="number" id="bmr" name="bmr" value="2000" required>
+            <button type="button" onclick="calculateRisk()">Calculate Risk</button>
+        </form>
+        <p id="riskResult"></p>
     </div>
 
-    <footer>
-        &copy; 2024 Science Expo - Chemical Risk Assessment
-    </footer>
+    <div class="footer">
+        &copy; 2024 National Science Expo. All rights reserved.
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const chemicals = {
-            "Caffeine": { 
-                "LD50": 192, "QSAR_Risk": 0.05, "Exp_Risk": 0.04, "Diseases": "Anxiety, Insomnia", 
-                "Solutions": "Reduce consumption of caffeinated products" 
-            },
-            "Aspartame": { 
-                "LD50": 5000, "QSAR_Risk": 0.01, "Exp_Risk": 0.005, "Diseases": "Headaches, Allergies", 
-                "Solutions": "Limit intake of artificial sweeteners" 
-            },
-            // Add all other chemicals here
-        };
-
-        function updateChemicalDetails() {
-            const chemical = document.getElementById("chemicalSelect").value;
-            const details = chemicals[chemical];
-            document.getElementById("chemicalDetails").innerHTML = `
-                <p><strong>LD50 Value:</strong> ${details.LD50} mg/kg</p>
-                <p><strong>QSAR Model Risk Level:</strong> ${details.QSAR_Risk}</p>
-                <p><strong>Experimental Risk Level:</strong> ${details.Exp_Risk}</p>
-                <p><strong>Diseases Caused:</strong> ${details.Diseases}</p>
-                <p><strong>Solutions to Reduce Risk:</strong> ${details.Solutions}</p>
-            `;
-            updateRiskChart(details.QSAR_Risk, details.Exp_Risk);
-        }
-
-        function updateRiskChart(qsarRisk, expRisk) {
+        // JavaScript for the chart and calculator
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chart initialization
             const ctx = document.getElementById('riskChart').getContext('2d');
-            if (window.riskChart) {
-                window.riskChart.destroy();
-            }
-            window.riskChart = new Chart(ctx, {
-                type: 'bar',
+            const riskChart = new Chart(ctx, {
+                type: 'line',
                 data: {
-                    labels: ['QSAR Model Risk', 'Experimental Risk'],
+                    labels: ['Caffeine', 'Aspartame', 'Sodium Benzoate'], // Replace with actual labels
                     datasets: [{
                         label: 'Risk Level',
-                        data: [qsarRisk, expRisk],
-                        backgroundColor: ['#007acc', '#ff5733'],
+                        data: [2.63E-06, 5.00E-08, 5.00E-07], // Replace with actual data
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -165,10 +182,17 @@
                     }
                 }
             });
-        }
+        });
 
-        // Initialize with the first chemical's data
-        updateChemicalDetails();
+        function calculateRisk() {
+            const concentration = parseFloat(document.getElementById('concentration').value);
+            const exposure = parseFloat(document.getElementById('exposure').value);
+            const bmr = parseFloat(document.getElementById('bmr').value);
+            
+            // Example calculation (modify as needed)
+            const riskLevel = (concentration * exposure) / bmr;
+            document.getElementById('riskResult').textContent = 'Calculated Risk Level: ' + riskLevel.toFixed(10);
+        }
     </script>
 </body>
 </html>
