@@ -24,6 +24,7 @@
             background: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             animation: fadeIn 1s ease-in-out;
+            overflow: hidden;
         }
         table {
             width: 100%;
@@ -66,9 +67,27 @@
         #riskResult {
             font-weight: bold;
         }
+        .info {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+        }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+        .graph-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        canvas {
+            border: 1px solid #ddd;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -105,32 +124,114 @@
                     <th>Final Risk Classification</th>
                 </tr>
             </thead>
-            <tbody id="results-table-body">
-                <!-- Data rows will be populated by JavaScript -->
+            <tbody>
+                <!-- Sample data rows (include all chemicals here) -->
+                <tr>
+                    <td>Caffeine</td>
+                    <td>192</td>
+                    <td>0.05</td>
+                    <td>0.04</td>
+                    <td>0.01</td>
+                    <td>80</td>
+                    <td>1 mg/kg</td>
+                    <td>1 kg/day</td>
+                    <td>2000</td>
+                    <td>2.63E-06</td>
+                    <td>1.5</td>
+                    <td>c = 1 mg/kg, e = 1 kg/day, BMR = 2000 kcal/day, Body mass = 70 kg</td>
+                    <td>2.63E-06</td>
+                    <td>3.95E-06</td>
+                    <td>50.00%</td>
+                    <td>0.00025</td>
+                    <td>2</td>
+                    <td>0.0103</td>
+                    <td>1333.33</td>
+                    <td>0.0143</td>
+                    <td>0.0107</td>
+                    <td>Moderate</td>
+                    <td>Moderate</td>
+                </tr>
+                <tr>
+                    <td>Aspartame</td>
+                    <td>10,000</td>
+                    <td>0.01</td>
+                    <td>0.02</td>
+                    <td>-0.01</td>
+                    <td>90</td>
+                    <td>0.5 mg/kg</td>
+                    <td>2 kg/day</td>
+                    <td>2000</td>
+                    <td>1.25E-06</td>
+                    <td>1.2</td>
+                    <td>c = 0.5 mg/kg, e = 2 kg/day, BMR = 2000 kcal/day, Body mass = 70 kg</td>
+                    <td>1.25E-06</td>
+                    <td>1.95E-06</td>
+                    <td>35.00%</td>
+                    <td>0.00015</td>
+                    <td>1.8</td>
+                    <td>0.0085</td>
+                    <td>1111.11</td>
+                    <td>0.0123</td>
+                    <td>0.0098</td>
+                    <td>Low</td>
+                    <td>Low</td>
+                </tr>
+                <tr>
+                    <td>Sodium Benzoate</td>
+                    <td>1,500</td>
+                    <td>0.03</td>
+                    <td>0.02</td>
+                    <td>0.01</td>
+                    <td>85</td>
+                    <td>0.2 mg/kg</td>
+                    <td>1.5 kg/day</td>
+                    <td>2000</td>
+                    <td>3.00E-06</td>
+                    <td>1.4</td>
+                    <td>c = 0.2 mg/kg, e = 1.5 kg/day, BMR = 2000 kcal/day, Body mass = 70 kg</td>
+                    <td>3.00E-06</td>
+                    <td>4.00E-06</td>
+                    <td>40.00%</td>
+                    <td>0.00035</td>
+                    <td>2.1</td>
+                    <td>0.0125</td>
+                    <td>1428.57</td>
+                    <td>0.0155</td>
+                    <td>0.0132</td>
+                    <td>High</td>
+                    <td>High</td>
+                </tr>
+                <!-- Add more rows for other chemicals here -->
             </tbody>
         </table>
 
-        <!-- Live Data Graph -->
-        <canvas id="riskChart" width="400" height="200"></canvas>
+        <!-- Live Data Graphs -->
+        <div class="graph-container">
+            <canvas id="riskChart" width="400" height="200"></canvas>
+            <canvas id="comparisonChart" width="400" height="200"></canvas>
+        </div>
 
         <!-- Risk Calculator -->
         <h2>Risk Calculator</h2>
         <form id="riskCalculator">
-            <label for="chemical-select">Select Chemical:</label>
-            <select id="chemical-select" required></select>
-            
+            <label for="chemical">Select Chemical:</label>
+            <select id="chemical" name="chemical" required>
+                <option value="">--Select Chemical--</option>
+                <option value="caffeine">Caffeine</option>
+                <option value="aspartame">Aspartame</option>
+                <option value="sodiumBenzoate">Sodium Benzoate</option>
+                <!-- Add more options here -->
+            </select>
             <label for="concentration">Concentration (c):</label>
             <input type="number" id="concentration" name="concentration" step="any" required>
-            
             <label for="exposure">Exposure (e):</label>
             <input type="number" id="exposure" name="exposure" step="any" required>
-            
             <label for="bmr">BMR (kcal/day):</label>
             <input type="number" id="bmr" name="bmr" value="2000" required>
-            
             <button type="button" onclick="calculateRisk()">Calculate Risk</button>
         </form>
         <p id="riskResult"></p>
+        <div id="info"></div>
     </div>
 
     <div class="footer">
@@ -138,67 +239,21 @@
     </div>
 
     <script>
-        // Sample chemical data
-        const chemicals = [
-            { name: "Caffeine", ld50: 192, qsarRisk: 0.05, experimentalRisk: 0.04, vf: 1.5, assumptions: "c = 1 mg/kg, e = 1 kg/day, BMR = 2000 kcal/day, Body mass = 70 kg", geneticFactor: 2, adjustmentFactor: 1333.33 },
-            { name: "Aspartame", ld50: 5000, qsarRisk: 0.01, experimentalRisk: 0.005, vf: 1.0, assumptions: "c = 1 mg/kg, e = 1 kg/day, BMR = 2000 kcal/day, Body mass = 70 kg", geneticFactor: 2, adjustmentFactor: 1500.00 },
-            // Add more chemicals here
-        ];
-
-        // Populate chemical dropdown and results table
+        // JavaScript for the chart and calculator
         document.addEventListener('DOMContentLoaded', function() {
-            populateChemicalDropdown();
-            populateResultsTable();
-            initChart();
-        });
-
-        function populateChemicalDropdown() {
-            const select = document.getElementById('chemical-select');
-            chemicals.forEach(chemical => {
-                const option = document.createElement('option');
-                option.value = chemical.name;
-                option.textContent = chemical.name;
-                select.appendChild(option);
-            });
-        }
-
-        function populateResultsTable() {
-            const tableBody = document.getElementById('results-table-body');
-            chemicals.forEach(chemical => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${chemical.name}</td>
-                    <td>${chemical.ld50}</td>
-                    <td>${chemical.qsarRisk}</td>
-                    <td>${chemical.experimentalRisk}</td>
-                    <td>${(chemical.qsarRisk - chemical.experimentalRisk).toFixed(4)}</td>
-                    <td>${(chemical.qsarRisk / chemical.experimentalRisk * 100).toFixed(1)}</td>
-                    <td>${chemical.vf}</td>
-                    <td>${chemical.assumptions}</td>
-                    <td>${chemical.geneticFactor}</td>
-                    <td>${chemical.adjustmentFactor}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        function initChart() {
+            // Chart initialization
             const ctx = document.getElementById('riskChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+
+            const riskChart = new Chart(ctx, {
+                type: 'line',
                 data: {
-                    labels: chemicals.map(c => c.name),
+                    labels: ['Caffeine', 'Aspartame', 'Sodium Benzoate'], // Replace with actual labels
                     datasets: [{
-                        label: 'QSAR Risk Level',
-                        data: chemicals.map(c => c.qsarRisk),
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        label: 'Risk Level',
+                        data: [2.63E-06, 1.25E-06, 3.00E-06], // Replace with actual data
                         borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    }, {
-                        label: 'Experimental Risk Level',
-                        data: chemicals.map(c => c.experimentalRisk),
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderWidth: 1
                     }]
                 },
@@ -210,28 +265,80 @@
                     }
                 }
             });
-        }
+
+            const comparisonChart = new Chart(comparisonCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Caffeine', 'Aspartame', 'Sodium Benzoate'], // Replace with actual labels
+                    datasets: [
+                        {
+                            label: 'QSAR Model Risk Level',
+                            data: [0.05, 0.01, 0.03], // Replace with actual QSAR model data
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Calculated Risk Level',
+                            data: [2.63E-06, 1.25E-06, 3.00E-06], // Replace with actual calculated data
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
 
         function calculateRisk() {
-            const selectedChemicalName = document.getElementById('chemical-select').value;
             const concentration = parseFloat(document.getElementById('concentration').value);
             const exposure = parseFloat(document.getElementById('exposure').value);
             const bmr = parseFloat(document.getElementById('bmr').value);
+            const chemical = document.getElementById('chemical').value;
 
-            const chemical = chemicals.find(c => c.name === selectedChemicalName);
-            if (chemical) {
-                const customRiskLevel = (concentration * exposure) / bmr;
-                const qsarRiskLevel = chemical.qsarRisk;
-                const difference = Math.abs(customRiskLevel - qsarRiskLevel).toFixed(4);
-                const accuracyChange = ((qsarRiskLevel / customRiskLevel) * 100).toFixed(2);
+            // Example data (Replace with real data and formulas)
+            let result = '';
+            let info = '';
 
-                document.getElementById('riskResult').innerHTML = `
-                    <strong>Calculated Risk Level:</strong> ${customRiskLevel.toFixed(10)}<br>
-                    <strong>QSAR Risk Level:</strong> ${qsarRiskLevel}<br>
-                    <strong>Difference:</strong> ${difference}<br>
-                    <strong>Accuracy Change (%):</strong> ${accuracyChange}
-                `;
+            switch (chemical) {
+                case 'caffeine':
+                    result = (concentration * exposure) / (bmr * 2000); // Simplified formula
+                    info = `
+                        <h3>Caffeine Risk Information</h3>
+                        <p>Diseases caused: Insomnia, Nervousness, Restlessness</p>
+                        <p>Solutions to reduce risk: Limit intake to less than 400 mg per day.</p>
+                    `;
+                    break;
+                case 'aspartame':
+                    result = (concentration * exposure) / (bmr * 10000); // Simplified formula
+                    info = `
+                        <h3>Aspartame Risk Information</h3>
+                        <p>Diseases caused: Headaches, Allergic Reactions</p>
+                        <p>Solutions to reduce risk: Avoid products containing aspartame.</p>
+                    `;
+                    break;
+                case 'sodiumBenzoate':
+                    result = (concentration * exposure) / (bmr * 1500); // Simplified formula
+                    info = `
+                        <h3>Sodium Benzoate Risk Information</h3>
+                        <p>Diseases caused: Allergies, Asthma</p>
+                        <p>Solutions to reduce risk: Avoid foods with high sodium benzoate content.</p>
+                    `;
+                    break;
+                default:
+                    result = 'Invalid chemical selected.';
+                    info = '';
             }
+
+            document.getElementById('riskResult').innerText = `Calculated Risk Level: ${result}`;
+            document.getElementById('info').innerHTML = info;
         }
     </script>
 </body>
